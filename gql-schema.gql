@@ -1,0 +1,94 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type UserType {
+  _id: ID!
+  username: String!
+  email: String!
+  number: String!
+  role: Role!
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+type AuthType {
+  token: String!
+  user: UserType!
+}
+
+type LikeType {
+  user: UserType!
+  post: PostType!
+}
+
+type CommentType {
+  userId: ID!
+  message: String!
+  postId: ID!
+}
+
+type PostType {
+  _id: ID!
+  user: UserType!
+  content: String!
+  likes: LikeType
+  type: PostTypeEnum!
+  comments: [CommentType!]
+  caption: String!
+}
+
+enum PostTypeEnum {
+  POST
+  RELL
+}
+
+type Query {
+  users: [UserType!]!
+  posts(pagination: PaginationInput!): [PostType!]!
+  post(postId: String!): PostType!
+  getArchivePosts: [PostType!]!
+}
+
+input PaginationInput {
+  limit: Float
+  page: Float
+}
+
+type Mutation {
+  updateUser(updateUserInput: UpdateUserInput!): UserType!
+  deleteUser: UserType!
+  login(loginInput: LoginInput!): AuthType!
+  singup(createUserInput: CreateUserInput!): AuthType!
+  addPost(createPostInput: CreatePostInput!): PostType!
+  deletePost(postId: String!): PostType!
+  archivePost(postId: String!): PostType!
+}
+
+input UpdateUserInput {
+  username: String
+  email: String
+  password: String
+  number: String
+}
+
+input LoginInput {
+  identifire: String!
+  password: String!
+}
+
+input CreateUserInput {
+  username: String!
+  email: String!
+  password: String!
+  number: String!
+}
+
+input CreatePostInput {
+  content: String!
+  type: PostTypeEnum
+  caption: String!
+}
