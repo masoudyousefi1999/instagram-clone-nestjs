@@ -35,7 +35,7 @@ export abstract class AbstractRepository<T extends AbstractEntity> {
           `duplicate error on field  ${duplicatedField} : please change your ${duplicatedField} and try again`,
         );
       }
-      throw new InternalServerErrorException(`server side error => ${error}`);
+      throw error;
     }
   }
 

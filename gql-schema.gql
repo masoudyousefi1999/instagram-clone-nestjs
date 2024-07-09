@@ -46,6 +46,13 @@ enum PostTypeEnum {
   RELL
 }
 
+type StoryType {
+  _id: ID!
+  content: String!
+  likes: [LikeType!]
+  user: UserType!
+}
+
 type Query {
   users: [UserType!]!
   posts(pagination: PaginationInput!): [PostType!]!
@@ -61,11 +68,21 @@ input PaginationInput {
 type Mutation {
   updateUser(updateUserInput: UpdateUserInput!): UserType!
   deleteUser: UserType!
+  follow(userId: String!): UserType!
+  unfollow(userId: String!): UserType!
   login(loginInput: LoginInput!): AuthType!
   singup(createUserInput: CreateUserInput!): AuthType!
   addPost(createPostInput: CreatePostInput!): PostType!
   deletePost(postId: String!): PostType!
   archivePost(postId: String!): PostType!
+  likePost(postId: String!): String!
+  dislikePost(postId: String!): String!
+  addComment(addCommentInput: AddCommentInput!): String!
+  deleteComment(postId: String!, commentId: String!): String!
+  addStory(addStoryInput: AddStoryInput!): StoryType!
+  deleteStory(storyId: String!): StoryType!
+  likeStory(storyId: String!): String!
+  disLikeStory(storyId: String!): String!
 }
 
 input UpdateUserInput {
@@ -91,4 +108,15 @@ input CreatePostInput {
   content: String!
   type: PostTypeEnum
   caption: String!
+}
+
+input AddCommentInput {
+  userId: ID
+  message: String!
+  postId: ID!
+}
+
+input AddStoryInput {
+  content: String!
+  userId: ID
 }

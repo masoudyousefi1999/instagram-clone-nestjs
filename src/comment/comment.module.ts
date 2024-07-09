@@ -9,5 +9,6 @@ import { CommentRepository } from './comment.repository';
     MongooseModule.forFeature([{ name: Comment.name, schema: CommentSchema }]),
   ],
   providers: [CommentService, CommentRepository],
+  exports: [CommentService],
 })
 export class CommentModule {}

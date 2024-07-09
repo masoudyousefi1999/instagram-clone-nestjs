@@ -12,11 +12,11 @@ export class Post extends AbstractEntity {
   user: Types.ObjectId;
   @Prop({ required: true })
   content: string;
-  @Prop({ type: SchemaType.Types.ObjectId, ref: Like.name })
+  @Prop([{ type: SchemaType.Types.ObjectId, ref: Like.name, default : [] }])
   likes: Like[];
   @Prop({ required: true, enum: PostTypeEnum, default: PostTypeEnum.POST })
   type: PostTypeEnum;
-  @Prop({ type: SchemaType.Types.ObjectId, ref: Comment.name })
+  @Prop([{ type: SchemaType.Types.ObjectId, ref: Comment.name, default : [] }])
   comments: Comment[];
   @Prop({ required: true, default: '' })
   caption: string;

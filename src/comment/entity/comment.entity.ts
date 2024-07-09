@@ -6,7 +6,7 @@ import { AbstractEntity } from 'src/common/database/entity/abstract.entity';
 export class Comment extends AbstractEntity {
   @Prop({ required: true, type: SchemaType.Types.ObjectId })
   userId: Types.ObjectId;
-  @Prop({ required: true, type: SchemaType.Types.ObjectId })
+  @Prop({ required: true })
   message: string;
   @Prop({ required: true, type: SchemaType.Types.ObjectId })
   postId: Types.ObjectId;

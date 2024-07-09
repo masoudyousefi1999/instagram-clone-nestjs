@@ -9,6 +9,8 @@ import { AuthModule } from './auth/auth.module';
 import { LikeModule } from './like/like.module';
 import { PostModule } from './post/post.module';
 import { CommentModule } from './comment/comment.module';
+import { StoryModule } from './story/story.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -29,6 +31,8 @@ import { CommentModule } from './comment/comment.module';
     LikeModule,
     PostModule,
     CommentModule,
+    StoryModule,
+    ScheduleModule.forRoot()
   ]
 })
 export class AppModule {}
