@@ -1,3 +1,0 @@
-// this is todo file. 
-
-like and dislike implemented and code rewieved and refactored successfully => next is add comment to post
