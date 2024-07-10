@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Inject,
   Injectable,
   UnprocessableEntityException,
@@ -11,12 +12,23 @@ import { Role } from './role.enum';
 import { hash } from 'bcryptjs';
 import { AuthService } from 'src/auth/auth.service';
 import { FilterQuery, Types, UpdateQuery } from 'mongoose';
+import { UserPrivacyEnum } from './user.privacy.enum';
 
 @Injectable()
 export class UserService {
   constructor(
     @Inject(UserRepository) private readonly userRepository: UserRepository,
   ) {}
+
+  isUserIdEqual(
+    currentUserId: Types.ObjectId,
+    targetUserId: Types.ObjectId,
+  ): null | BadRequestException {
+    if (currentUserId.toString() === targetUserId.toString()) {
+      throw new BadRequestException('your id and target id cannot be same.');
+    }
+    return null;
+  }
 
   async getAllUsers(): Promise<User[]> {
     return this.userRepository.findAllDocuments();
@@ -50,10 +62,24 @@ export class UserService {
     return this.userRepository.deleteDocument({ _id: id });
   }
 
+  async changeUserPrivacy(userId: Types.ObjectId) {
+    const currentUser = await this.userRepository.findOneUser({ _id: userId });
+    const privacy =
+      currentUser.privacy === UserPrivacyEnum.PUBLIC
+        ? UserPrivacyEnum.PRIVATE
+        : UserPrivacyEnum.PUBLIC;
+    return await this.userRepository.updateUser(
+      { _id: userId },
+      { privacy },
+      true,
+    );
+  }
+
   async follow(
     currentUserId: Types.ObjectId,
     targetUserId: Types.ObjectId,
-  ): Promise<User> {
+  ): Promise<User | string> {
+    this.isUserIdEqual(currentUserId, targetUserId);
     const currentUser = await this.userRepository.findOneUser({
       _id: currentUserId,
     });
@@ -63,49 +89,94 @@ export class UserService {
     if (isUserFollowtargetBefore !== -1) {
       throw new UnprocessableEntityException('you follow this user before.');
     }
-    const updatedUser = await this.userRepository.updateUser(
+    const targetUser = await this.userRepository.findOneUser({
+      _id: targetUserId,
+    });
+
+    if (targetUser.privacy === UserPrivacyEnum.PUBLIC) {
+      await this.userRepository.updateUser(
+        { _id: currentUserId },
+        {
+          $push: { followings: targetUserId },
+        },
+        true,
+      );
+      await this.userRepository.updateUser(
+        { _id: targetUserId },
+        {
+          $push: { followers: currentUserId },
+        },
+      );
+      return 'followed successfully';
+    }
+
+    await this.userRepository.updateUser(
+      { _id: targetUserId },
+      { $push: { requests: currentUserId } },
+    );
+    return 'follow request sent.';
+  }
+
+  async acceptFollowRequest(
+    currentUserId: Types.ObjectId,
+    targetUserId: Types.ObjectId,
+  ) {
+    this.isUserIdEqual(currentUserId, targetUserId);
+    const currentUser = await this.userRepository.findOneUser({
+      _id: currentUserId,
+    });
+    const filtredRequests = currentUser.requests.filter(
+      (requestId) => requestId.toString() !== targetUserId.toString(),
+    );
+    if (filtredRequests.length === currentUser.requests.length) {
+      throw new BadRequestException("this user not send you a request.")
+    }
+    await this.userRepository.updateUser(
       { _id: currentUserId },
       {
-        $push: { followings: targetUserId },
+        requests: filtredRequests,
+        $push: { followers: targetUserId },
       },
       true,
     );
     await this.userRepository.updateUser(
       { _id: targetUserId },
       {
-        $push: { followers: currentUserId },
+        $push: { followings: currentUserId },
       },
     );
-    return updatedUser;
+
+    return 'follow request accepted successfully';
   }
 
   async unFollow(currentUserId: Types.ObjectId, targetUserId: Types.ObjectId) {
+    this.isUserIdEqual(currentUserId, targetUserId);
     const currentUser = await this.userRepository.findOneUser({
       _id: currentUserId,
     });
-    const isUserFollowtargetBefore = currentUser.followings.filter(
+    const filtredFollowingsList = currentUser.followings.filter(
       (followerId) => followerId.toString() !== targetUserId.toString(),
     );
-    if (isUserFollowtargetBefore.length === currentUser.followings.length) {
+    if (filtredFollowingsList.length === currentUser.followings.length) {
       throw new UnprocessableEntityException(
-        'you cant unfollow this user because you diden\'t follow him :) .',
+        "you cant unfollow this user because you diden't follow him :) .",
       );
     }
     const targetUser = await this.userRepository.findOneUser({
       _id: targetUserId,
     });
-    const newFollowwingList = targetUser.followers.filter(
+    const filtredTargetFollowersList = targetUser.followers.filter(
       (followerId) => followerId.toString() !== currentUserId.toString(),
-    );
-    const updatedUser = await this.userRepository.updateUser(
-      { _id: currentUserId },
-      { followings: isUserFollowtargetBefore },
     );
     await this.userRepository.updateUser(
       { _id: targetUserId },
-      { followers: newFollowwingList },
+      { followers: filtredTargetFollowersList },
       true,
     );
-    return updatedUser;
+    await this.userRepository.updateUser(
+      { _id: currentUserId },
+      { followings: filtredFollowingsList },
+    );
+    return "unfollow successfully.";
   }
 }

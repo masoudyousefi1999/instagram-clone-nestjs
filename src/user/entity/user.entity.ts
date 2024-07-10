@@ -4,6 +4,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Post } from 'src/post/entity/post.entity';
 import { Story } from 'src/story/entity/stroy.entity';
 import { Schema as SchemaType, Types } from 'mongoose';
+import { UserPrivacyEnum } from '../user.privacy.enum';
 @Schema({
   versionKey: false,
   toJSON: { virtuals: true },
@@ -25,10 +26,27 @@ export class User extends AbstractEntity {
 
   @Prop({ required: true, enum: Role })
   role?: Role;
-  @Prop([{ type: SchemaType.Types.ObjectId, ref: 'User', default: [] }])
+  @Prop([{ type: SchemaType.Types.ObjectId, ref: 'User', default: [], unique : true }])
   followers?: User[] | Types.ObjectId[];
-  @Prop([{ type: SchemaType.Types.ObjectId, ref: 'User', default: [] }])
+  @Prop([{ type: SchemaType.Types.ObjectId, ref: 'User', default: [], unique : true }])
   followings?: User[] | Types.ObjectId[];
+  @Prop({
+    required: false,
+    enum: UserPrivacyEnum,
+    default: UserPrivacyEnum.PUBLIC,
+  })
+  privacy?: UserPrivacyEnum;
+
+  @Prop([
+    {
+      required: false,
+      type: SchemaType.Types.ObjectId,
+      ref: 'User',
+      default: [],
+      unique : true
+    },
+  ])
+  requests?: User[] | Types.ObjectId[];
 
   posts?: Post[];
 }

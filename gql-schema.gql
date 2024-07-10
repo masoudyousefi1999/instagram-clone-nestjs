@@ -8,11 +8,17 @@ type UserType {
   email: String!
   number: String!
   role: Role!
+  privacy: UserPrivacyEnum!
 }
 
 enum Role {
   ADMIN
   USER
+}
+
+enum UserPrivacyEnum {
+  PUBLIC
+  PRIVATE
 }
 
 type AuthType {
@@ -68,8 +74,10 @@ input PaginationInput {
 type Mutation {
   updateUser(updateUserInput: UpdateUserInput!): UserType!
   deleteUser: UserType!
-  follow(userId: String!): UserType!
-  unfollow(userId: String!): UserType!
+  changePrivacy: UserType!
+  follow(userId: String!): String!
+  acceptFollowRequest(userId: String!): String!
+  unfollow(userId: String!): String!
   login(loginInput: LoginInput!): AuthType!
   singup(createUserInput: CreateUserInput!): AuthType!
   addPost(createPostInput: CreatePostInput!): PostType!
