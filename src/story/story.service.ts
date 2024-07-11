@@ -7,12 +7,14 @@ import { StoryRepository } from './story.repository';
 import { AddStoryInput } from './input/addStory.input';
 import { LikeService } from 'src/like/like.service';
 import { Types } from 'mongoose';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class StoryService {
   constructor(
     @Inject(StoryRepository) private readonly storyRepository: StoryRepository,
     @Inject(LikeService) private readonly likeService: LikeService,
+    @Inject(UserService) private readonly userService: UserService,
   ) {}
 
   async deleteStory(storyId: Types.ObjectId, userId: Types.ObjectId) {
@@ -74,5 +76,16 @@ export class StoryService {
       { likes: filtredLikes },
     );
     return 'post disliked successfully';
+  }
+
+  async getAllStories(userId: Types.ObjectId) {
+    const currentUser = await this.userService.findUser({ _id: userId });
+    return await this.storyRepository.getStories({
+      userId: { $in: currentUser.followings },
+    });
+  }
+
+  async getStory(storyId: Types.ObjectId, userId: Types.ObjectId) {
+    return await this.storyRepository.findOneStory({ _id: storyId });
   }
 }

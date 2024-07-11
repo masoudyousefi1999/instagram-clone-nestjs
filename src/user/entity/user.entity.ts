@@ -26,9 +26,9 @@ export class User extends AbstractEntity {
 
   @Prop({ required: true, enum: Role })
   role?: Role;
-  @Prop([{ type: SchemaType.Types.ObjectId, ref: 'User', default: [], unique : true }])
+  @Prop([{ type: SchemaType.Types.ObjectId, ref: 'User', default: [] }])
   followers?: User[] | Types.ObjectId[];
-  @Prop([{ type: SchemaType.Types.ObjectId, ref: 'User', default: [], unique : true }])
+  @Prop([{ type: SchemaType.Types.ObjectId, ref: 'User', default: [] }])
   followings?: User[] | Types.ObjectId[];
   @Prop({
     required: false,
@@ -42,8 +42,7 @@ export class User extends AbstractEntity {
       required: false,
       type: SchemaType.Types.ObjectId,
       ref: 'User',
-      default: [],
-      unique : true
+      default: []
     },
   ])
   requests?: User[] | Types.ObjectId[];

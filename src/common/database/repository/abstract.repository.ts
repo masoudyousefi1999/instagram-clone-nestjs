@@ -72,7 +72,7 @@ export abstract class AbstractRepository<T extends AbstractEntity> {
     try {
       const documnets = await this.model
         .find({})
-        .sort({createdAt : -1})
+        .sort({ createdAt: -1 })
         .select(select)
         .populate(populate)
         .lean<T[]>();
@@ -83,9 +83,7 @@ export abstract class AbstractRepository<T extends AbstractEntity> {
     }
   }
 
-  async deleteDocument(
-    filterQuery: FilterQuery<T>,
-  ): Promise<T> {
+  async deleteDocument(filterQuery: FilterQuery<T>): Promise<T> {
     try {
       const deletedDocument = await this.model
         .findOneAndDelete(filterQuery)
@@ -114,7 +112,7 @@ export abstract class AbstractRepository<T extends AbstractEntity> {
       const updateDocument = await this.model.findOneAndUpdate(
         filterQuery,
         {
-          $set: { ...updateQuery },
+          ...updateQuery,
         },
         {
           new: true,

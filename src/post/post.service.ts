@@ -13,6 +13,7 @@ import { Role } from 'src/user/role.enum';
 import { LikeService } from 'src/like/like.service';
 import { AddCommentInput } from 'src/comment/input/comment.input';
 import { CommentService } from 'src/comment/comment.service';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class PostService {
@@ -20,13 +21,14 @@ export class PostService {
     @Inject(PostRepository) private readonly postRepository: PostRepository,
     @Inject(LikeService) private readonly likeService: LikeService,
     @Inject(CommentService) private readonly commentService: CommentService,
+    @Inject(UserService) private readonly userService: UserService,
   ) {}
 
   async addPost(createPostInput: CreatePostInput): Promise<Post> {
     return this.postRepository.createPost(createPostInput);
   }
 
-  async getAllPosts(paginationInput: PaginationInput): Promise<Post[]> {
+  async getAllPosts(paginationInput: PaginationInput, userId): Promise<Post[]> {
     const { page, limit } = paginationInput;
     let skip: number | null;
     if (page && limit) {
@@ -34,7 +36,13 @@ export class PostService {
         skip = (page - 1) * limit;
       }
     }
-    return this.postRepository.getAllPosts({ isActive: true }, page, skip);
+    const currentUser = await this.userService.findUser({ _id: userId });
+
+    return this.postRepository.getAllPosts(
+      { isActive: true, user: { $in: currentUser.followings } },
+      page,
+      skip,
+    );
   }
 
   async getPost(id: string): Promise<Post> {
@@ -122,7 +130,7 @@ export class PostService {
 
   async addCommentToPost(addCommentInput: AddCommentInput) {
     const { postId, userId } = addCommentInput;
-    await this.postRepository.findOnePost({_id : postId})
+    await this.postRepository.findOnePost({ _id: postId });
     const comment = await this.commentService.addComment(addCommentInput);
     await this.postRepository.updatePost(
       { _id: postId, user: userId },

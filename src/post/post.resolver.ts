@@ -13,11 +13,14 @@ import { AddCommentInput } from 'src/comment/input/comment.input';
 export class PostResolver {
   constructor(@Inject(PostService) private readonly postService: PostService) {}
 
+  @UseGuards(LoginAuthGuard)
   @Query((returns) => [PostType], { name: 'posts' })
   async getAllPosts(
     @Args('pagination') paginationInput: PaginationInput,
+    @Context() ctx,
   ): Promise<Post[]> {
-    return this.postService.getAllPosts(paginationInput);
+    const userId = ctx.req.user._id;
+    return this.postService.getAllPosts(paginationInput,userId);
   }
 
   @Query((returns) => PostType, { name: 'post' })

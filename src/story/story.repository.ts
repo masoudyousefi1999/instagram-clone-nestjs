@@ -18,11 +18,20 @@ export class StoryRepository extends AbstractRepository<Story> {
     return currentStory;
   }
 
-  async updateStory(filterQuery : FilterQuery<Story>, updateQuery : UpdateQuery<Story>){
+  async updateStory(
+    filterQuery: FilterQuery<Story>,
+    updateQuery: UpdateQuery<Story>,
+  ) {
     const currentStory = await this.storyModel
-      .findOneAndUpdate(filterQuery,updateQuery)
+      .findOneAndUpdate(filterQuery, updateQuery)
       .populate('userId')
       .populate('likes');
     return currentStory;
+  }
+
+  async getStories(
+    filterQuery: FilterQuery<Story>,
+  ) {
+    return await this.storyModel.find(filterQuery);
   }
 }

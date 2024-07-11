@@ -46,4 +46,19 @@ export class StoryResolver {
     const storyObjId = new Types.ObjectId(storyId);
     return this.storyService.dislikeStory(storyObjId, userId);
   }
+
+  @UseGuards(LoginAuthGuard)
+  @Mutation((returns) => StoryType)
+  async getAllStories(@Context() ctx) {
+    const userId = ctx.req.user._id;
+    return this.storyService.getAllStories(userId);
+  }
+
+  @UseGuards(LoginAuthGuard)
+  @Mutation((returns) => StoryType)
+  async getStory(@Args('storyId') storyId: string, @Context() ctx) {
+    const userId = ctx.req.user._id;
+    const storyObjId = new Types.ObjectId(storyId);
+    return this.storyService.getStory(storyObjId, userId);
+  }
 }
